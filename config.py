@@ -1,21 +1,10 @@
-# وضع التداول
-TRADING_MODE = "PAPER"  # PAPER للتجريبي، REAL للحساب الحقيقي
+# config.py
+# إعدادات الحساب
+MODE = "PAPER"  # "PAPER" للتجريبي، "REAL" للحقيقي
+API_KEY = "fUPhEYky7xhJGJKlzG2djaWfcwQCUEIs7jIWiySLdd0e9bnJeUA9pfg2XKbjnv7y"
+API_SECRET = "fSYeBIPnL6GzMchmLF6GB8dUNWjYCdxCnv8R9GpVEk4AixeD6d3gLRJrJSQOCaeO"
 
-# العملة الأساسية وحجم الصفقة
-BASE_CURRENCY = "USDT"
-POSITION_SIZE_PERCENT = 5  # نسبة كل صفقة من الرصيد
-
-# التعلم الذاتي
-LEARNING_RATE = 0.1  # سرعة تعلم البوت
-MAX_CONCURRENT_TRADES = 3  # أقصى عدد صفقات متزامنة
-
-# المحاكاة
-SIMULATION_DAYS = 30  # عدد أيام المحاكاة الافتراضية
-
-# مسارات الملفات
-LOG_PATH = "logs/trade_history.json"
-STRATEGY_PATH = "logs/strategy_stats.json"
-SIM_PATH = "logs/sim_results/"
-
-# واجهة
-PORT = 5000
+# إعدادات التداول
+INITIAL_BALANCE = 50          # الرصيد الابتدائي بالدولار
+TRADE_PERCENT = 5             # نسبة الرصيد لكل صفقة
+MAX_POSITIONS = 3             # عدد العملات المتداولة بنفس الوقت
