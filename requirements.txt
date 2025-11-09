@@ -1,3 +1,6 @@
-flask==2.3.3
-python-binance
-python-dotenv
+flask>=2.2.5
+python-binance>=1.0.32
+python-dotenv>=1.2.1
+pandas
+numpy
+requests
