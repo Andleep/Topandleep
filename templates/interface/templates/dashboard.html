@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>AION Quantum Supreme v11</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <h1>AION Quantum Supreme v11</h1>
+    <h3>الوضع الحالي: {{ mode }}</h3>
+    <h3>الرصيد: {{ balance }}</h3>
+    <button onclick="location.href='/execute_trade'">تنفيذ التجارة</button>
+    <button onclick="location.href='/run_simulation'">تشغيل المحاكاة</button>
+    <button onclick="location.href='/toggle_mode'">تبديل الوضع</button>
+
+    <h2>الصفقات</h2>
+    <table border="1">
+        <tr>
+            <th>الاستراتيجية</th>
+            <th>حجم الصفقة</th>
+            <th>الربح</th>
+            <th>الرصيد بعد الصفقة</th>
+        </tr>
+        {% for t in trades %}
+        <tr>
+            <td>{{ t.strategy }}</td>
+            <td>{{ t.position_size }}</td>
+            <td>{{ t.profit }}</td>
+            <td>{{ t.balance }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>التعلم</h2>
+    <p>عدد الاستراتيجيات المتعلمة: {{ learning_progress }}</p>
+</body>
+</html>
