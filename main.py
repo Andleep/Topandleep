@@ -1,39 +1,37 @@
-from flask import Flask, render_template, jsonify, request
-from trading_bot import TradingBot
-from simulator import Simulator
-from config import PORT, TRADING_MODE
+# main.py
+from flask import Flask, render_template, request, redirect
+from config import *
+from utils.trading import TradingBot
+from simulator.backtest import Backtester
 
 app = Flask(__name__)
-bot = TradingBot(balance=50)
-sim = Simulator()
+bot = TradingBot(balance=INITIAL_BALANCE, trade_percent=TRADE_PERCENT, max_positions=MAX_POSITIONS)
 
-# الوضع الحالي: تجريبي أو حقيقي
-current_mode = TRADING_MODE
-
-@app.route('/')
+@app.route("/")
 def dashboard():
-    trades = bot.trade_log
-    balance = round(bot.balance,2)
-    return render_template('dashboard.html', trades=trades, balance=balance, mode=current_mode)
+    return render_template("dashboard.html",
+                           balance=bot.balance,
+                           trades=bot.trades,
+                           mode=MODE,
+                           learning_progress=bot.learning_progress())
 
-@app.route('/execute_trade', methods=['POST'])
+@app.route("/execute_trade")
 def execute_trade():
-    trade = bot.execute_trade()
-    return jsonify(trade)
+    bot.run_live_trade()
+    return redirect("/")
 
-@app.route('/run_simulation', methods=['POST'])
+@app.route("/run_simulation")
 def run_simulation():
-    days = int(request.json.get("days",30))
-    initial_balance = float(request.json.get("balance",50))
-    results = sim.run_simulation(days=days, initial_balance=initial_balance)
-    return jsonify(results)
+    sim = Backtester(bot)
+    sim.run()
+    return redirect("/")
 
-@app.route('/set_mode', methods=['POST'])
-def set_mode():
-    global current_mode
-    mode = request.json.get("mode","PAPER")
-    current_mode = mode
-    return jsonify({"status":"ok","mode":current_mode})
+@app.route("/toggle_mode")
+def toggle_mode():
+    global MODE
+    MODE = "REAL" if MODE == "PAPER" else "PAPER"
+    bot.mode = MODE
+    return redirect("/")
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=PORT, debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
