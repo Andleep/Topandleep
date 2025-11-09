@@ -1,78 +1,60 @@
-import json
 import os
+import time
+import math
 from binance.client import Client
-from datetime import datetime
+from binance.enums import *
+from binance.exceptions import BinanceAPIException
 
 class AIONBot:
-    def __init__(self):
-        self.load_config()
-        self.client = Client(self.api_key, self.api_secret, testnet=True)  # حساب تجريبي
-        self.balance = self.start_balance
+    def __init__(self, api_key, api_secret, mode="PAPER"):
+        self.api_key = api_key
+        self.api_secret = api_secret
+        self.mode = mode.upper()
+        
+        # ✅ نستخدم Binance Testnet بدل المنصة الحقيقية
+        self.client = Client(api_key, api_secret, testnet=True)
+        self.client.API_URL = 'https://testnet.binance.vision/api'
+        
+        self.balance = 50.0
         self.trades = []
-        self.mode = 'PAPER'  # PAPER = تجريبي، LIVE = حقيقي
-        self.load_learning()
+        self.strategy_list = ["scalping", "momentum", "mean_reversion"]
+        self.position_size = 2.5
 
-    def load_config(self):
-        # ضع هنا مفاتيح حسابك التجريبي
-        self.api_key = "YOUR_TESTNET_API_KEY"
-        self.api_secret = "YOUR_TESTNET_API_SECRET"
-        self.start_balance = 50
+    def fetch_price(self, symbol="BTCUSDT"):
+        try:
+            ticker = self.client.get_symbol_ticker(symbol=symbol)
+            return float(ticker['price'])
+        except Exception as e:
+            print("❌ Error fetching price:", e)
+            return None
 
-    def load_learning(self):
-        if os.path.exists("learning.json"):
-            with open("learning.json", "r") as f:
-                self.learning = json.load(f)
-        else:
-            self.learning = {}
-
-    def save_learning(self):
-        with open("learning.json", "w") as f:
-            json.dump(self.learning, f)
-
-    def get_dashboard_data(self):
-        return {
-            "balance": self.balance,
-            "trades": self.trades,
-            "learning": self.learning
+    def trade(self, symbol="BTCUSDT"):
+        strategy = self.choose_strategy()
+        price = self.fetch_price(symbol)
+        if not price:
+            return
+        
+        position = self.position_size
+        profit = round((price * 0.001) * (1 if math.sin(time.time()) > 0 else -1), 3)
+        self.balance += profit
+        self.balance = round(self.balance, 2)
+        
+        trade_data = {
+            "strategy": strategy,
+            "position_size": position,
+            "profit": profit,
+            "balance": self.balance
         }
+        self.trades.append(trade_data)
+        print(f"✅ Executed {strategy} trade | Profit: {profit} | Balance: {self.balance}")
 
-    def execute_trade(self):
-        # مثال تنفيذي للتداول
-        trade = {
-            "strategy": "scalping",
-            "position_size": 2.5,
-            "profit": 0.1,
-            "balance": round(self.balance + 0.1, 2),
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
-        self.balance = trade["balance"]
-        self.trades.append(trade)
-        self.update_learning(trade)
+    def choose_strategy(self):
+        import random
+        return random.choice(self.strategy_list)
 
-    def run_simulation(self):
-        # مثال للمحاكاة التاريخية
-        for i in range(10):
-            trade = {
-                "strategy": "momentum",
-                "position_size": 2.5,
-                "profit": 0.15,
-                "balance": round(self.balance + 0.15, 2),
-                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            }
-            self.balance = trade["balance"]
-            self.trades.append(trade)
-            self.update_learning(trade)
-
-    def toggle_mode(self):
-        if self.mode == 'PAPER':
-            self.mode = 'LIVE'
-        else:
-            self.mode = 'PAPER'
-
-    def update_learning(self, trade):
-        strategy = trade["strategy"]
-        if strategy not in self.learning:
-            self.learning[strategy] = {"trades": 0, "profit": 0}
-        self.learning[strategy]["trades"] += 1
-        self.learning[strategy]["profit"] += trade["profit"]
-        self.save_learning()
+    def run_simulation(self, symbol="BTCUSDT", steps=10):
+        print("🚀 Starting AI simulation...")
+        for _ in range(steps):
+            self.trade(symbol)
+            time.sleep(1)
+        print("✅ Simulation finished.")
