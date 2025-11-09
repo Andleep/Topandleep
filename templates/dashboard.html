@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>AION Quantum Supreme v11</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+        h1 { color: #003366; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        th { background-color: #003366; color: #fff; }
+        button { padding: 10px 20px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>لوحة التحكم - AION Quantum Supreme v11</h1>
+    <h2>الرصيد الحالي: ${{ data.balance }}</h2>
+
+    <form method="POST" action="/execute_trade">
+        <button type="submit">تنفيذ صفقة</button>
+    </form>
+    <form method="POST" action="/run_simulation">
+        <button type="submit">تشغيل المحاكاة</button>
+    </form>
+    <form method="POST" action="/toggle_mode">
+        <button type="submit">تبديل الوضع ({{ data.mode if data.mode else 'PAPER' }})</button>
+    </form>
+
+    <h2>الصفقات:</h2>
+    <table>
+        <tr>
+            <th>الاستراتيجية</th>
+            <th>حجم الصفقة</th>
+            <th>الربح</th>
+            <th>الرصيد بعد الصفقة</th>
+            <th>الوقت</th>
+        </tr>
+        {% for trade in data.trades %}
+        <tr>
+            <td>{{ trade.strategy }}</td>
+            <td>{{ trade.position_size }}</td>
+            <td>{{ trade.profit }}</td>
+            <td>{{ trade.balance }}</td>
+            <td>{{ trade.timestamp }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>التعلم والاستراتيجيات:</h2>
+    <table>
+        <tr>
+            <th>الاستراتيجية</th>
+            <th>عدد الصفقات</th>
+            <th>الأرباح المتراكمة</th>
+        </tr>
+        {% for strategy, info in data.learning.items() %}
+        <tr>
+            <td>{{ strategy }}</td>
+            <td>{{ info.trades }}</td>
+            <td>{{ info.profit }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
