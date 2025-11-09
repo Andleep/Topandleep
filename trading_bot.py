@@ -1,46 +1,24 @@
-from binance.client import Client
-from strategy import QuantumStrategy
-from utils import log_trade, update_cumulative_profit
-from config import CONFIG
-import time, random
+from strategy import StrategyManager
+from utils import load_json, save_json
+from config import LOG_PATH, POSITION_SIZE_PERCENT, BASE_CURRENCY
+import random
+import os
 
-class AIONQuantumTrader:
-    def __init__(self, api_key, api_secret, mode="PAPER"):
-        self.mode = mode
-        try:
-            self.client = Client(api_key, api_secret, testnet=(mode == "PAPER"))
-        except Exception:
-            self.client = None
-        self.strategy = QuantumStrategy()
-        self.balance = 50.0
-        self.cumulative_profit = 0
-        self.virtual_balances = [self.balance / CONFIG["virtual_accounts"]] * CONFIG["virtual_accounts"]
+class TradingBot:
+    def __init__(self, balance=50):
+        self.balance = balance
+        self.strategy_manager = StrategyManager()
+        self.trade_log = load_json(LOG_PATH)
+        if not self.trade_log:
+            self.trade_log = []
 
-    def start_trading(self):
-        print(f"\n🚀 AION Quantum Supreme v6.0 started in {self.mode} mode.\n")
-        while True:
-            for i in range(CONFIG["virtual_accounts"]):
-                for pair in CONFIG["pairs"]:
-                    signal = self.strategy.generate_signal(pair)
-                    if signal == "BUY":
-                        self.execute_trade(pair, i)
-            time.sleep(CONFIG["trade_interval_sec"])
-
-    def execute_trade(self, pair, account_index):
-        capital = self.virtual_balances[account_index]
-        amount = capital * CONFIG["risk_per_trade"]
-        profit = amount * CONFIG["profit_target"]
-        loss = amount * CONFIG["stop_loss"]
-
-        outcome = random.choices(["WIN", "LOSS"], weights=[85, 15])[0]
-        if outcome == "WIN":
-            self.virtual_balances[account_index] += profit
-            self.cumulative_profit += profit
-        else:
-            self.virtual_balances[account_index] -= loss
-            self.cumulative_profit -= loss
-
-        log_trade(pair, outcome, profit if outcome == "WIN" else -loss)
-        update_cumulative_profit(self.cumulative_profit)
-
-        print(f"💰 {pair} | Result: {outcome} | New balance {round(self.virtual_balances[account_index],2)} USDT")
+    def execute_trade(self):
+        strategy = self.strategy_manager.select_strategy()
+        position_size = self.balance * (POSITION_SIZE_PERCENT/100)
+        profit = position_size * random.uniform(-0.02, 0.08)  # خسارة أو ربح
+        self.balance += profit
+        trade = {"strategy": strategy, "position_size": position_size, "profit": round(profit,2), "balance": round(self.balance,2)}
+        self.trade_log.append(trade)
+        save_json(self.trade_log, LOG_PATH)
+        self.strategy_manager.update_strategy(strategy, profit)
+        return trade
