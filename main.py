@@ -1,28 +1,22 @@
-from trading_bot import AIONQuantumTrader
-import os
-from dotenv import load_dotenv
-from flask import Flask
+from trading_bot import TradingBot
+from simulator import Simulator
+from flask import Flask, render_template
+from config import TRADING_MODE
 
-load_dotenv()
-
-API_KEY = os.getenv("API_KEY")
-API_SECRET = os.getenv("API_SECRET")
-MODE = os.getenv("MODE", "PAPER")  # PAPER = تجريبي, REAL = حقيقي
-
-bot = AIONQuantumTrader(api_key=API_KEY, api_secret=API_SECRET, mode=MODE)
-
-# تشغيل البوت في الخلفية
-import threading
-threading.Thread(target=bot.start_trading, daemon=True).start()
-
-# إنشاء خادم ويب صغير لتوافق Render
 app = Flask(__name__)
+bot = TradingBot()
+sim = Simulator()
 
 @app.route("/")
-def home():
-    return "🚀 AION Quantum Supreme v6.0 is running!"
+def dashboard():
+    trades = bot.trade_log
+    return render_template("dashboard.html", trades=trades, balance=round(bot.balance,2))
+
+@app.route("/simulate")
+def simulate():
+    results = sim.run_simulation()
+    return render_template("dashboard.html", trades=results, balance=results[-1]["balance"])
 
 if __name__ == "__main__":
-    # Render يحدد PORT عبر متغير البيئة
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    print(f"🚀 AION Quantum Supreme v9 is running in {TRADING_MODE} mode!")
+    app.run(host="0.0.0.0", port=5000)
