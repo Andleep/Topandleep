@@ -7,7 +7,7 @@ class StrategyManager:
         self.stats = load_json(STRATEGY_PATH)
 
     def select_strategy(self):
-        # اختيار استراتيجية بشكل عشوائي (تطوير لاحق: تعلم ذاتي)
+        # اختيار استراتيجية، لاحقًا البوت يتعلم ويطورها
         return random.choice(["scalping", "momentum", "mean_reversion"])
 
     def update_strategy(self, strategy, profit):
