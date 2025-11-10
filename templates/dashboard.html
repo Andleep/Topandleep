@@ -2,47 +2,46 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>AION Quantum Supreme</title>
+<title>لوحة AION Quantum Supreme</title>
 <style>
-body { font-family: Arial; text-align: center; direction: rtl; }
-button { margin: 5px; padding: 10px 20px; font-size: 16px; }
-table { margin: 0 auto; border-collapse: collapse; width: 80%; }
-th, td { border: 1px solid #ccc; padding: 8px; }
+body { font-family: Arial, sans-serif; direction: rtl; text-align: right; margin: 20px; }
+button { padding: 10px 20px; margin: 5px; }
+table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+th, td { border: 1px solid #000; padding: 8px; }
+th { background-color: #f2f2f2; }
 </style>
-<script>
-async function startTrading() {
-    await fetch("/start_trading", { method: "POST" });
-    alert("تم بدء التداول المباشر!");
-}
-async function stopTrading() {
-    await fetch("/stop_trading", { method: "POST" });
-    alert("تم إيقاف التداول!");
-}
-async function runSimulation() {
-    const res = await fetch("/simulate", { method: "POST" });
-    const data = await res.json();
-    alert("تم تنفيذ المحاكاة!");
-    location.reload();
-}
-</script>
 </head>
 <body>
-<h1>AION Quantum Supreme v11</h1>
-<h2>الرصيد الحالي: {{ balance }}</h2>
-<button onclick="startTrading()">ابدأ التداول</button>
-<button onclick="stopTrading()">إيقاف التداول</button>
-<button onclick="runSimulation()">تشغيل المحاكاة</button>
-<h2>الصفقات</h2>
+<h1>AION Quantum Supreme</h1>
+<p>الرصيد الحالي: ${{ balance }}</p>
+<p>معدل تعلم البوت: {{ learning_rate }}</p>
+
+<button onclick="location.href='/start'">ابدأ التداول المباشر</button>
+<button onclick="location.href='/stop'">إيقاف التداول</button>
+<button onclick="location.href='/simulate'">تشغيل المحاكاة</button>
+
 <table>
-<tr><th>الاستراتيجية</th><th>حجم الصفقة</th><th>الربح</th><th>الرصيد بعد الصفقة</th></tr>
+<tr>
+<th>الاستراتيجية</th>
+<th>حجم الصفقة</th>
+<th>الربح</th>
+<th>الرصيد</th>
+</tr>
 {% for trade in trades %}
 <tr>
 <td>{{ trade.strategy }}</td>
-<td>{{ trade.position_size }}</td>
+<td>{{ trade.size }}</td>
 <td>{{ trade.profit }}</td>
 <td>{{ trade.balance }}</td>
 </tr>
 {% endfor %}
 </table>
+
+<h2>أداء الاستراتيجيات</h2>
+<ul>
+{% for strategy, perf in strategies.items() %}
+<li>{{ strategy }}: {{ perf }}</li>
+{% endfor %}
+</ul>
 </body>
 </html>
