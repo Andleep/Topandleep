@@ -1,27 +1,27 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, jsonify
 from bot import AIONBot
-import os
 
 app = Flask(__name__)
-
-API_KEY = os.getenv("BINANCE_API_KEY")
-API_SECRET = os.getenv("BINANCE_API_SECRET")
-
-bot = AIONBot(API_KEY, API_SECRET, mode="PAPER")
+bot = AIONBot()
 
 @app.route("/")
 def dashboard():
-    return render_template("dashboard.html", bot=bot)
+    return render_template("dashboard.html", balance=bot.balance, trades=bot.trades)
 
-@app.route("/execute_trade")
-def execute_trade():
-    bot.trade()
-    return redirect(url_for("dashboard"))
+@app.route("/start_trading", methods=["POST"])
+def start_trading():
+    bot.start_trading()
+    return jsonify({"status": "started"})
 
-@app.route("/run_simulation")
-def run_simulation():
+@app.route("/stop_trading", methods=["POST"])
+def stop_trading():
+    bot.stop_trading()
+    return jsonify({"status": "stopped"})
+
+@app.route("/simulate", methods=["POST"])
+def simulate():
     bot.run_simulation()
-    return redirect(url_for("dashboard"))
+    return jsonify({"status": "simulation_done", "trades": bot.trades})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=True)
