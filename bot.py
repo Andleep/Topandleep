@@ -1,34 +1,58 @@
-import time
+import os
+import pandas as pd
 from binance.client import Client
 from binance.enums import *
 
 class AIONBot:
     def __init__(self):
-        self.balance = 50.0  # الرصيد المبدئي
+        self.balance = 50.0  # الرصيد الابتدائي التجريبي
         self.trades = []  # سجل الصفقات
+        self.strategy_performance = {}  # أداء كل استراتيجية
+        self.learning_rate = 0.0  # معدل التعلم
         self.trading = False
-        self.client = Client(api_key="fUPhEYky7xhJGJKlzG2djaWfcwQCUEIs7jIWiySLdd0e9bnJeUA9pfg2XKbjnv7y", api_secret="fSYeBIPnL6GzMchmLF6GB8dUNWjYCdxCnv8R9GpVEk4AixeD6d3gLRJrJSQOCaeO", testnet=True)
+
+        # مفاتيح Binance Testnet
+        self.api_key = os.getenv("fUPhEYky7xhJGJKlzG2djaWfcwQCUEIs7jIWiySLdd0e9bnJeUA9pfg2XKbjnv7y")
+        self.api_secret = os.getenv("fSYeBIPnL6GzMchmLF6GB8dUNWjYCdxCnv8R9GpVEk4AixeD6d3gLRJrJSQOCaeO")
+        self.client = Client(self.api_key, self.api_secret, testnet=True)
 
     def start_trading(self):
         self.trading = True
-        # تشغيل حلقة التداول المباشر في الخلفية
-        import threading
-        threading.Thread(target=self._trading_loop, daemon=True).start()
+        # هنا يمكن تنفيذ الصفقات المباشرة على Testnet
+        self.execute_trade("momentum", 2.5, "BTCUSDT")
 
     def stop_trading(self):
         self.trading = False
 
-    def _trading_loop(self):
-        while self.trading:
-            # مثال على تداول وهمي لحساب الرصيد
-            trade = {"strategy": "scalping", "position_size": 2.5, "profit": 0.1, "balance": self.balance + 0.1}
-            self.trades.append(trade)
-            self.balance += 0.1
-            time.sleep(2)  # تأخير 2 ثانية بين كل صفقة
+    def execute_trade(self, strategy, size, symbol):
+        # مثال بسيط على تنفيذ صفقة Testnet
+        if self.trading:
+            # استدعاء API للتداول التجريبي
+            order = self.client.create_test_order(
+                symbol=symbol,
+                side=SIDE_BUY,
+                type=ORDER_TYPE_MARKET,
+                quantity=size
+            )
+            # سجل الصفقة بشكل وهمي للتجربة
+            profit = size * 10  # مثال على الربح
+            self.balance += profit
+            self.trades.append({
+                "strategy": strategy,
+                "size": size,
+                "profit": profit,
+                "balance": self.balance
+            })
 
-    def run_simulation(self):
-        self.trades = []
-        for i in range(10):
-            trade = {"strategy": "simulation", "position_size": 2.0, "profit": 0.2, "balance": self.balance + 0.2}
-            self.trades.append(trade)
-            self.balance += 0.2
+    def run_simulation(self, start_date=None, end_date=None):
+        # تحميل بيانات تاريخية من Binance وتحليلها
+        # هنا مثال بسيط على محاكاة وهمية
+        simulated_profit = 50
+        self.balance += simulated_profit
+        self.trades.append({
+            "strategy": "simulation",
+            "size": 2.5,
+            "profit": simulated_profit,
+            "balance": self.balance
+        })
+        self.learning_rate += 0.05
