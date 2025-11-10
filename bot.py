@@ -7,7 +7,7 @@ class AIONBot:
         self.balance = 50.0  # الرصيد المبدئي
         self.trades = []  # سجل الصفقات
         self.trading = False
-        self.client = Client(api_key="YOUR_TESTNET_API_KEY", api_secret="YOUR_TESTNET_API_SECRET", testnet=True)
+        self.client = Client(api_key="fUPhEYky7xhJGJKlzG2djaWfcwQCUEIs7jIWiySLdd0e9bnJeUA9pfg2XKbjnv7y", api_secret="fSYeBIPnL6GzMchmLF6GB8dUNWjYCdxCnv8R9GpVEk4AixeD6d3gLRJrJSQOCaeO", testnet=True)
 
     def start_trading(self):
         self.trading = True
