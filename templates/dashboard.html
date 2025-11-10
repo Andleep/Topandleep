@@ -1,39 +1,48 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <title>AION Quantum Supreme</title>
-  <style>
-    body { font-family: "Cairo", sans-serif; background: #0f172a; color: white; text-align: center; padding: 40px; }
-    button { background: #2563eb; color: white; border: none; padding: 12px 24px; margin: 10px; border-radius: 10px; cursor: pointer; }
-    button:hover { background: #1e40af; }
-    table { margin: 20px auto; border-collapse: collapse; width: 80%; color: white; }
-    th, td { border: 1px solid #475569; padding: 10px; }
-  </style>
+<meta charset="UTF-8">
+<title>AION Quantum Supreme</title>
+<style>
+body { font-family: Arial; text-align: center; direction: rtl; }
+button { margin: 5px; padding: 10px 20px; font-size: 16px; }
+table { margin: 0 auto; border-collapse: collapse; width: 80%; }
+th, td { border: 1px solid #ccc; padding: 8px; }
+</style>
+<script>
+async function startTrading() {
+    await fetch("/start_trading", { method: "POST" });
+    alert("تم بدء التداول المباشر!");
+}
+async function stopTrading() {
+    await fetch("/stop_trading", { method: "POST" });
+    alert("تم إيقاف التداول!");
+}
+async function runSimulation() {
+    const res = await fetch("/simulate", { method: "POST" });
+    const data = await res.json();
+    alert("تم تنفيذ المحاكاة!");
+    location.reload();
+}
+</script>
 </head>
 <body>
-  <h1>AION Quantum Supreme v11</h1>
-  <h2>الوضع الحالي: {{ bot.mode }}</h2>
-  <h3>الرصيد: ${{ bot.balance }}</h3>
-
-  <button onclick="window.location.href='/execute_trade'">💹 تنفيذ صفقة مباشرة</button>
-  <button onclick="window.location.href='/run_simulation'">🤖 تشغيل المحاكاة</button>
-
-  <table>
-    <tr>
-      <th>الاستراتيجية</th>
-      <th>حجم الصفقة</th>
-      <th>الربح</th>
-      <th>الرصيد</th>
-    </tr>
-    {% for t in bot.trades %}
-    <tr>
-      <td>{{ t.strategy }}</td>
-      <td>{{ t.position_size }}</td>
-      <td>{{ t.profit }}</td>
-      <td>{{ t.balance }}</td>
-    </tr>
-    {% endfor %}
-  </table>
+<h1>AION Quantum Supreme v11</h1>
+<h2>الرصيد الحالي: {{ balance }}</h2>
+<button onclick="startTrading()">ابدأ التداول</button>
+<button onclick="stopTrading()">إيقاف التداول</button>
+<button onclick="runSimulation()">تشغيل المحاكاة</button>
+<h2>الصفقات</h2>
+<table>
+<tr><th>الاستراتيجية</th><th>حجم الصفقة</th><th>الربح</th><th>الرصيد بعد الصفقة</th></tr>
+{% for trade in trades %}
+<tr>
+<td>{{ trade.strategy }}</td>
+<td>{{ trade.position_size }}</td>
+<td>{{ trade.profit }}</td>
+<td>{{ trade.balance }}</td>
+</tr>
+{% endfor %}
+</table>
 </body>
 </html>
