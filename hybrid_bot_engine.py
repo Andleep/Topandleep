@@ -58,19 +58,56 @@ class AIONHybridBot:
         self.load_state()
     
     def set_keys(self, api_key, api_secret, mode="DEMO"):
-        """تعيين مفاتيح API"""
+        """تعيين مفاتيح API مع تصحيح الأخطاء المفصل"""
         try:
+            print(f"🔧 جاري تعيين المفاتيح للوضع: {mode}")
+            print(f"📝 API Key: {api_key[:10]}...{api_key[-4:] if api_key else 'None'}")
+            print(f"📝 API Secret: {'*' * 10}...{api_secret[-4:] if api_secret else 'None'}")
+            
             self.api_key = api_key
             self.api_secret = api_secret
             self.mode = mode
             
-            if api_key and api_secret:
-                self.client = Client(api_key, api_secret, testnet=(mode=="DEMO"))
-                print(f"✅ تم تعيين المفاتيح للوضع: {mode}")
-                return True
-            return False
+            if not api_key or not api_secret:
+                print("❌ المفاتيح فارغة!")
+                return False
+            
+            if len(api_key) < 20 or len(api_secret) < 20:
+                print("❌ المفاتيح قصيرة جداً!")
+                return False
+                
+            # اختبار الاتصال الفعلي
+            from binance.client import Client
+            self.client = Client(api_key, api_secret, testnet=(mode=="DEMO"))
+            
+            # اختبار بسيط للاتصال
+            server_time = self.client.get_server_time()
+            print(f"✅ وقت السيرفر: {server_time['serverTime']}")
+            
+            # جلب معلومات الحساب
+            account_info = self.client.get_account()
+            print(f"✅ يمكن التداول: {account_info.get('canTrade', False)}")
+            print(f"✅ عدد الأصول: {len(account_info.get('balances', []))}")
+            
+            print("🎉 تم تعيين المفاتيح بنجاح!")
+            return True
+            
         except Exception as e:
-            print(f"❌ خطأ في تعيين المفاتيح: {e}")
+            print(f"❌ خطأ تفصيلي في تعيين المفاتيح: {str(e)}")
+            
+            # تحليل نوع الخطأ
+            error_msg = str(e)
+            if "Invalid API-key" in error_msg:
+                print("🔍 السبب: مفتاح API غير صحيح")
+            elif "Signature" in error_msg:
+                print("🔍 السبب: مفتاح Secret غير صحيح") 
+            elif "restrictions" in error_msg.lower():
+                print("🔍 السبب: قيود جغرافية - جرب VPN")
+            elif "connection" in error_msg.lower():
+                print("🔍 السبب: مشكلة في الاتصال بالإنترنت")
+            else:
+                print(f"🔍 السبب: {error_msg}")
+                
             return False
     
     def start_trading(self):
