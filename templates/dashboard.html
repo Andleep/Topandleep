@@ -2,7 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>AION Omega v15 HYBRID - لوحة التحكم الذكية</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AION Omega v15 HYBRID</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -13,49 +14,62 @@
             --light-bg: #fffdf0;
         }
         
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
             background: linear-gradient(135deg, var(--light-bg) 0%, #f7e8a1 100%);
             color: var(--dark-gold);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             text-align: center;
+            min-height: 100vh;
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 100%;
             margin: 0 auto;
+            padding: 5px;
         }
         
         .header {
             background: linear-gradient(135deg, var(--gold), var(--light-gold));
             color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 25px rgba(184, 134, 11, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(184, 134, 11, 0.3);
+        }
+        
+        h1 {
+            font-size: 1.4em;
+            margin-bottom: 10px;
         }
         
         .goal-display {
-            font-size: 24px;
+            font-size: 1.1em;
             font-weight: bold;
-            margin: 15px 0;
+            margin: 10px 0;
         }
         
         .progress-section {
             background: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px 0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
         .progress-bar {
             width: 100%;
-            height: 30px;
+            height: 25px;
             background: #f1f1f1;
-            border-radius: 15px;
-            margin: 15px 0;
+            border-radius: 12px;
+            margin: 10px 0;
             overflow: hidden;
             position: relative;
         }
@@ -70,64 +84,44 @@
         .progress-labels {
             display: flex;
             justify-content: space-between;
-            margin-top: 10px;
+            margin-top: 8px;
             font-weight: bold;
-        }
-        
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin: 20px 0;
-        }
-        
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            text-align: right;
-        }
-        
-        .intelligence-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .intelligence-score {
-            font-size: 48px;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        
-        .intelligence-breakdown {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .intelligence-metric {
-            background: rgba(255,255,255,0.2);
-            padding: 10px;
-            border-radius: 10px;
+            font-size: 0.9em;
         }
         
         .control-panel {
             display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 20px 0;
+            flex-direction: column;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 10px 0;
+        }
+        
+        input, select {
+            padding: 12px;
+            margin: 3px 0;
+            border: 2px solid var(--gold);
+            border-radius: 8px;
+            width: 100%;
+            font-size: 16px; /* يمنع التكبير في iOS */
         }
         
         .btn {
-            padding: 12px 25px;
+            padding: 15px;
             border: none;
             border-radius: 10px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
+            margin: 5px 0;
+            width: 100%;
         }
         
         .btn-start {
@@ -145,58 +139,86 @@
             color: white;
         }
         
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        .btn-test {
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            color: white;
         }
         
-        .input-group {
+        .dashboard-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
             margin: 15px 0;
         }
         
-        input, select {
-            padding: 10px;
-            margin: 5px;
-            border: 2px solid var(--gold);
-            border-radius: 8px;
-            width: 200px;
-        }
-        
-        .charts-container {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-            margin: 20px 0;
-        }
-        
-        .chart-card {
+        .card {
             background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: right;
         }
         
-        .trades-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        
-        .trades-table th, .trades-table td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            text-align: center;
-        }
-        
-        .trades-table th {
-            background: linear-gradient(135deg, var(--gold), var(--light-gold));
+        .intelligence-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+        }
+        
+        .intelligence-score {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .intelligence-breakdown {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .intelligence-metric {
+            background: rgba(255,255,255,0.2);
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+        
+        .status-indicator {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+            display: inline-block;
+        }
+        
+        .status-running {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .status-stopped {
+            background: #f44336;
+            color: white;
+        }
+        
+        .status-connecting {
+            background: #FF9800;
+            color: white;
+        }
+        
+        .connection-test {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #2196F3;
         }
         
         .live-indicator {
             display: inline-block;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             background: #4CAF50;
             border-radius: 50%;
             margin-right: 5px;
@@ -209,14 +231,48 @@
             100% { opacity: 1; }
         }
         
-        .status-running {
-            color: #4CAF50;
-            font-weight: bold;
+        .trades-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 0.9em;
         }
         
-        .status-stopped {
-            color: #f44336;
-            font-weight: bold;
+        .trades-table th, .trades-table td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+        
+        .trades-table th {
+            background: linear-gradient(135deg, var(--gold), var(--light-gold));
+            color: white;
+        }
+        
+        @media (min-width: 768px) {
+            .container {
+                max-width: 700px;
+            }
+            
+            .control-panel {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .btn {
+                width: auto;
+                flex: 1;
+            }
+            
+            .input-group {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            input, select {
+                width: auto;
+                flex: 1;
+            }
         }
     </style>
 </head>
@@ -224,23 +280,30 @@
     <div class="container">
         <!-- الرأس -->
         <div class="header">
-            <h1>🤖 AION Omega v15 HYBRID - النسخة المهجنة الذكية</h1>
+            <h1>🤖 AION Omega v15 HYBRID</h1>
             <div class="goal-display">
                 الهدف: $<span id="currentBalance">50</span> → $5,000 خلال <span id="daysRemaining">90</span> يوم
             </div>
             <div id="botStatus" class="status-stopped">⏹️ متوقف</div>
         </div>
 
+        <!-- اختبار الاتصال -->
+        <div class="connection-test" id="connectionTest" style="display: none;">
+            <strong>🔍 اختبار الاتصال:</strong>
+            <div id="connectionStatus">جاري الاختبار...</div>
+        </div>
+
         <!-- لوحة التحكم -->
         <div class="control-panel">
             <div class="input-group">
-                <input id="apiKey" placeholder="API Key" type="password">
-                <input id="apiSecret" placeholder="API Secret" type="password">
+                <input id="apiKey" placeholder="API Key من Testnet" type="password">
+                <input id="apiSecret" placeholder="API Secret من Testnet" type="password">
                 <select id="modeSelect">
                     <option value="DEMO">💰 الوضع التجريبي</option>
                     <option value="REAL">🚀 الوضع الحقيقي</option>
                 </select>
             </div>
+            <button class="btn btn-test" onclick="testConnection()">🔗 اختبار الاتصال</button>
             <button class="btn btn-start" onclick="startBot()">🚀 بدء التداول</button>
             <button class="btn btn-stop" onclick="stopBot()">🛑 إيقاف التداول</button>
             <button class="btn btn-simulate" onclick="runSimulation()">📊 محاكاة متقدمة</button>
@@ -266,14 +329,14 @@
             <div class="card">
                 <h3>📈 إحصائيات الأداء</h3>
                 <div id="performanceStats">
-                    <!-- سيتم تعبئتها بالجافاسكريبت -->
+                    <p>جاري التحميل...</p>
                 </div>
             </div>
 
             <!-- الذكاء التكيفي -->
             <div class="card intelligence-card">
                 <h3>🧠 الذكاء التكيفي</h3>
-                <div class="intelligence-score" id="intelligenceScore">50%</div>
+                <div class="intelligence-score" id="intelligenceScore">0%</div>
                 <div class="intelligence-breakdown">
                     <div class="intelligence-metric">
                         <div>معدل التعلم</div>
@@ -295,224 +358,253 @@
             </div>
         </div>
 
-        <!-- الرسوم البيانية -->
-        <div class="charts-container">
-            <!-- رسم بياني للأداء -->
-            <div class="chart-card">
-                <h3>📊 الرسم البياني للأداء</h3>
-                <canvas id="performanceChart"></canvas>
-            </div>
-
-            <!-- الصفقات الحية -->
-            <div class="chart-card">
-                <h3>🔄 الصفقات الحية <span class="live-indicator"></span></h3>
-                <div id="liveTrades">
-                    <!-- سيتم تعبئتها بالجافاسكريبت -->
-                </div>
+        <!-- الصفقات الحية -->
+        <div class="card">
+            <h3>🔄 الصفقات الحية <span class="live-indicator"></span></h3>
+            <div id="liveTrades">
+                <p>لا توجد صفقات حية حالياً</p>
             </div>
         </div>
 
         <!-- سجل الصفقات -->
         <div class="card">
             <h3>📋 سجل الصفقات</h3>
-            <table class="trades-table">
-                <thead>
-                    <tr>
-                        <th>الوقت</th>
-                        <th>الرمز</th>
-                        <th>النوع</th>
-                        <th>الاستراتيجية</th>
-                        <th>المبلغ</th>
-                        <th>الربح</th>
-                        <th>الحالة</th>
-                    </tr>
-                </thead>
-                <tbody id="tradesTableBody">
-                    <!-- سيتم تعبئتها بالجافاسكريبت -->
-                </tbody>
-            </table>
+            <div style="overflow-x: auto;">
+                <table class="trades-table">
+                    <thead>
+                        <tr>
+                            <th>الوقت</th>
+                            <th>الرمز</th>
+                            <th>النوع</th>
+                            <th>الربح</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tradesTableBody">
+                        <tr><td colspan="5">جاري التحميل...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- معلومات التصحيح -->
+        <div class="card" style="background: #fff3cd; border-left: 4px solid #ffc107;">
+            <h3>🐛 معلومات التصحيح</h3>
+            <div id="debugInfo">
+                <p>✅ الواجهة تعمل - جاري انتظار الاتصال</p>
+            </div>
         </div>
     </div>
 
     <script>
         // المتغيرات العامة
-        let performanceChart = null;
+        let updateInterval;
 
         // التهيئة عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', function() {
-            loadStats();
-            updateAllData();
-            setInterval(updateAllData, 3000); // تحديث كل 3 ثواني
+            console.log('✅ الصفحة محملة - بدء التهيئة');
+            showDebug('🔧 جاري تهيئة النظام...');
+            loadInitialData();
         });
+
+        // تحميل البيانات الأولية
+        async function loadInitialData() {
+            try {
+                showDebug('📡 جاري الاتصال بالسيرفر...');
+                const response = await fetch('/stats');
+                if (!response.ok) throw new Error('فشل الاتصال بالسيرفر');
+                
+                const data = await response.json();
+                updateDisplay(data);
+                showDebug('✅ تم الاتصال بالسيرفر بنجاح');
+                
+                // بدء التحديث التلقائي
+                startAutoUpdate();
+                
+            } catch (error) {
+                showDebug('❌ خطأ في الاتصال: ' + error.message);
+                console.error('Error:', error);
+            }
+        }
+
+        // بدء التحديث التلقائي
+        function startAutoUpdate() {
+            if (updateInterval) clearInterval(updateInterval);
+            updateInterval = setInterval(updateAllData, 3000);
+        }
 
         // تحديث جميع البيانات
         async function updateAllData() {
-            await loadStats();
-            await updateChart();
-            await updateLiveTrades();
-            await updateTradesTable();
+            try {
+                const [statsResponse, tradesResponse, liveResponse] = await Promise.all([
+                    fetch('/stats'),
+                    fetch('/trades'),
+                    fetch('/live-trades')
+                ]);
+
+                if (statsResponse.ok) {
+                    const stats = await statsResponse.json();
+                    updateDisplay(stats);
+                }
+
+                if (tradesResponse.ok) {
+                    const trades = await tradesResponse.json();
+                    updateTradesTable(trades);
+                }
+
+                if (liveResponse.ok) {
+                    const liveTrades = await liveResponse.json();
+                    updateLiveTrades(liveTrades);
+                }
+
+            } catch (error) {
+                console.error('Update error:', error);
+            }
         }
 
-        // تحميل الإحصائيات
-        async function loadStats() {
-            try {
-                const response = await fetch('/stats');
-                const data = await response.json();
-                
-                // تحديث الرصيد والتقدم
-                document.getElementById('currentBalance').textContent = data.current_balance.toFixed(2);
-                document.getElementById('startBalance').textContent = data.initial_balance;
-                document.getElementById('daysRemaining').textContent = data.days_remaining;
-                
-                // شريط التقدم
-                const progressFill = document.getElementById('progressFill');
-                const progressPercent = Math.min(data.progress_percent, 100);
-                progressFill.style.width = progressPercent + '%';
-                document.getElementById('progressText').textContent = progressPercent.toFixed(1) + '% من الهدف';
-                document.getElementById('progressDetails').textContent = 
-                    `مطلوب: ${data.required_daily}% يومياً | متبقي: ${data.days_remaining} يوم`;
-                
-                // إحصائيات الأداء
-                document.getElementById('performanceStats').innerHTML = `
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: center;">
-                        <div>
-                            <div style="font-size: 24px; font-weight: bold; color: var(--gold);">$${data.total_profit.toFixed(2)}</div>
-                            <div>إجمالي الأرباح</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 24px; font-weight: bold; color: var(--gold);">${data.win_rate.toFixed(1)}%</div>
-                            <div>معدل النجاح</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 24px; font-weight: bold; color: var(--gold);">${data.total_trades}</div>
-                            <div>عدد الصفقات</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 24px; font-weight: bold; color: ${data.current_streak >= 0 ? '#4CAF50' : '#f44336'};">${data.current_streak}</div>
-                            <div>الاتجاه الحالي</div>
-                        </div>
+        // تحديث العرض
+        function updateDisplay(data) {
+            // تحديث الرصيد والتقدم
+            document.getElementById('currentBalance').textContent = data.current_balance.toFixed(2);
+            document.getElementById('startBalance').textContent = data.initial_balance;
+            document.getElementById('daysRemaining').textContent = data.days_remaining;
+            
+            // شريط التقدم
+            const progressFill = document.getElementById('progressFill');
+            const progressPercent = Math.min(data.progress_percent, 100);
+            progressFill.style.width = progressPercent + '%';
+            document.getElementById('progressText').textContent = progressPercent.toFixed(1) + '% من الهدف';
+            document.getElementById('progressDetails').textContent = 
+                `مطلوب: ${data.required_daily}% يومياً | متبقي: ${data.days_remaining} يوم`;
+            
+            // إحصائيات الأداء
+            document.getElementById('performanceStats').innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: center;">
+                    <div>
+                        <div style="font-size: 1.4em; font-weight: bold; color: var(--gold);">$${data.total_profit.toFixed(2)}</div>
+                        <div>إجمالي الأرباح</div>
                     </div>
-                `;
-                
-                // الذكاء التكيفي
+                    <div>
+                        <div style="font-size: 1.4em; font-weight: bold; color: var(--gold);">${data.win_rate.toFixed(1)}%</div>
+                        <div>معدل النجاح</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4em; font-weight: bold; color: var(--gold);">${data.total_trades}</div>
+                        <div>عدد الصفقات</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4em; font-weight: bold; color: ${data.current_streak >= 0 ? '#4CAF50' : '#f44336'};">${data.current_streak}</div>
+                        <div>الاتجاه الحالي</div>
+                    </div>
+                </div>
+            `;
+            
+            // الذكاء التكيفي
+            if (data.adaptive_intelligence) {
                 const ai = data.adaptive_intelligence;
                 document.getElementById('intelligenceScore').textContent = ai.score + '%';
                 document.getElementById('learningRate').textContent = ai.learning_rate + '%';
                 document.getElementById('patternRecognition').textContent = ai.pattern_recognition + '%';
                 document.getElementById('riskAdjustment').textContent = ai.risk_adjustment + '%';
                 document.getElementById('marketAdaptation').textContent = ai.market_adaptation + '%';
-                
-            } catch (error) {
-                console.error('Error loading stats:', error);
-            }
-        }
-
-        // تحديث الرسم البياني
-        async function updateChart() {
-            try {
-                const response = await fetch('/balance-history');
-                const history = await response.json();
-                
-                const ctx = document.getElementById('performanceChart').getContext('2d');
-                
-                if (performanceChart) {
-                    performanceChart.destroy();
-                }
-                
-                performanceChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: history.map(item => new Date(item.timestamp).toLocaleTimeString()),
-                        datasets: [{
-                            label: 'الرصيد ($)',
-                            data: history.map(item => item.balance),
-                            borderColor: '#b8860b',
-                            backgroundColor: 'rgba(184, 134, 11, 0.1)',
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                display: true,
-                                position: 'top',
-                            },
-                            title: {
-                                display: true,
-                                text: 'تطور الرصيد مع الوقت'
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: false
-                            }
-                        }
-                    }
-                });
-            } catch (error) {
-                console.error('Error updating chart:', error);
             }
         }
 
         // تحديث الصفقات الحية
-        async function updateLiveTrades() {
-            try {
-                const response = await fetch('/live-trades');
-                const liveTrades = await response.json();
-                
-                const liveTradesContainer = document.getElementById('liveTrades');
-                
-                if (liveTrades.length === 0) {
-                    liveTradesContainer.innerHTML = '<p>لا توجد صفقات حية حالياً</p>';
-                    return;
-                }
-                
-                liveTradesContainer.innerHTML = liveTrades.map(trade => `
-                    <div style="background: #f8f9fa; padding: 10px; margin: 5px 0; border-radius: 8px; border-left: 4px solid #4CAF50;">
-                        <strong>${trade.symbol}</strong> - ${trade.type} 
-                        <br><small>الاستراتيجية: ${trade.strategy}</small>
-                        <br><small>المبلغ: $${trade.amount}</small>
-                    </div>
-                `).join('');
-            } catch (error) {
-                console.error('Error updating live trades:', error);
+        function updateLiveTrades(liveTrades) {
+            const liveTradesContainer = document.getElementById('liveTrades');
+            
+            if (!liveTrades || liveTrades.length === 0) {
+                liveTradesContainer.innerHTML = '<p>لا توجد صفقات حية حالياً</p>';
+                return;
             }
+            
+            liveTradesContainer.innerHTML = liveTrades.map(trade => `
+                <div style="background: #f8f9fa; padding: 10px; margin: 5px 0; border-radius: 8px; border-left: 4px solid #4CAF50;">
+                    <strong>${trade.symbol}</strong> - ${trade.type} 
+                    <br><small>الاستراتيجية: ${trade.strategy}</small>
+                    <br><small>المبلغ: $${trade.amount}</small>
+                    <br><small>الربح: $${trade.profit}</small>
+                </div>
+            `).join('');
         }
 
         // تحديث جدول الصفقات
-        async function updateTradesTable() {
-            try {
-                const response = await fetch('/trades');
-                const trades = await response.json();
-                
-                const tableBody = document.getElementById('tradesTableBody');
-                tableBody.innerHTML = '';
-                
-                trades.slice().reverse().forEach(trade => {
-                    const row = document.createElement('tr');
-                    const profit = trade.profit || 0;
-                    const profitColor = profit > 0 ? '#4CAF50' : profit < 0 ? '#f44336' : '#666';
-                    
-                    row.innerHTML = `
-                        <td>${new Date(trade.timestamp).toLocaleTimeString()}</td>
-                        <td>${trade.symbol}</td>
-                        <td>${trade.type}</td>
-                        <td>${trade.strategy}</td>
-                        <td>$${trade.amount}</td>
-                        <td style="color: ${profitColor}; font-weight: bold;">$${profit.toFixed(2)}</td>
-                        <td>
-                            <span style="color: ${trade.status === 'OPEN' ? '#4CAF50' : '#666'};">
-                                ${trade.status === 'OPEN' ? '🟢 حية' : '🔴 مغلقة'}
-                            </span>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
+        function updateTradesTable(trades) {
+            const tableBody = document.getElementById('tradesTableBody');
+            
+            if (!trades || trades.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5">لا توجد صفقات بعد</td></tr>';
+                return;
+            }
+            
+            tableBody.innerHTML = '';
+            trades.slice().reverse().forEach(trade => {
+                const row = document.createElement('tr');
+                const profit = trade.profit || 0;
+                const profitColor = profit > 0 ? '#4CAF50' : profit < 0 ? '#f44336' : '#666';
+                const time = new Date(trade.timestamp).toLocaleTimeString('ar-EG', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    second: '2-digit'
                 });
+                
+                row.innerHTML = `
+                    <td>${time}</td>
+                    <td>${trade.symbol || 'N/A'}</td>
+                    <td>${trade.type || 'N/A'}</td>
+                    <td style="color: ${profitColor}; font-weight: bold;">$${profit.toFixed(2)}</td>
+                    <td>
+                        <span style="color: ${trade.status === 'OPEN' ? '#4CAF50' : '#666'};">
+                            ${trade.status === 'OPEN' ? '🟢 حية' : '🔴 مغلقة'}
+                        </span>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // اختبار الاتصال
+        async function testConnection() {
+            const apiKey = document.getElementById('apiKey').value;
+            const apiSecret = document.getElementById('apiSecret').value;
+            
+            if (!apiKey || !apiSecret) {
+                alert('⚠️ يرجى إدخال مفاتيح API أولاً');
+                return;
+            }
+            
+            showDebug('🔗 جاري اختبار الاتصال بـ Binance...');
+            document.getElementById('connectionTest').style.display = 'block';
+            document.getElementById('connectionStatus').textContent = 'جاري الاختبار...';
+            
+            try {
+                const response = await fetch('/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        api_key: apiKey,
+                        api_secret: apiSecret,
+                        mode: 'DEMO',
+                        test_connection: true
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('connectionStatus').innerHTML = '✅ <strong>الاتصال ناجح!</strong> - المفاتيح صحيحة';
+                    showDebug('✅ اختبار الاتصال نجح - جاهز للتداول');
+                } else {
+                    document.getElementById('connectionStatus').innerHTML = '❌ <strong>فشل الاتصال:</strong> ' + (result.error || 'تحقق من المفاتيح');
+                    showDebug('❌ فشل اختبار الاتصال: ' + (result.error || 'مفاتيح خاطئة'));
+                }
+                
             } catch (error) {
-                console.error('Error updating trades table:', error);
+                document.getElementById('connectionStatus').innerHTML = '❌ <strong>خطأ في الشبكة:</strong> ' + error.message;
+                showDebug('❌ خطأ شبكة: ' + error.message);
             }
         }
 
@@ -521,6 +613,13 @@
             const apiKey = document.getElementById('apiKey').value;
             const apiSecret = document.getElementById('apiSecret').value;
             const mode = document.getElementById('modeSelect').value;
+            
+            if (!apiKey || !apiSecret) {
+                alert('⚠️ يرجى إدخال مفاتيح API أولاً');
+                return;
+            }
+            
+            showDebug('🚀 جاري بدء التداول...');
             
             try {
                 const response = await fetch('/start', {
@@ -536,42 +635,53 @@
                 });
                 
                 const result = await response.json();
-                alert(result.status || result);
                 
-                if (result.status && result.status.includes('بدأ')) {
+                if (response.ok) {
+                    alert('✅ ' + result.status);
                     document.getElementById('botStatus').className = 'status-running';
                     document.getElementById('botStatus').textContent = '🟢 يعمل';
+                    showDebug('✅ بدء التداول بنجاح - جاري المراقبة...');
+                } else {
+                    alert('❌ ' + (result.error || result.status || 'فشل البدء'));
+                    showDebug('❌ فشل بدء التداول: ' + (result.error || 'غير معروف'));
                 }
                 
             } catch (error) {
-                alert('خطأ في بدء التداول: ' + error.message);
+                alert('❌ خطأ في بدء التداول: ' + error.message);
+                showDebug('❌ خطأ في البدء: ' + error.message);
             }
         }
 
         // إيقاف التداول
         async function stopBot() {
+            showDebug('🛑 جاري إيقاف التداول...');
+            
             try {
                 const response = await fetch('/stop', {
                     method: 'POST'
                 });
                 
                 const result = await response.json();
-                alert(result.status || result);
+                alert(result.status || '✅ تم الإيقاف');
                 
                 document.getElementById('botStatus').className = 'status-stopped';
                 document.getElementById('botStatus').textContent = '⏹️ متوقف';
+                showDebug('✅ إيقاف التداول بنجاح');
                 
             } catch (error) {
-                alert('خطأ في إيقاف التداول: ' + error.message);
+                alert('❌ خطأ في الإيقاف: ' + error.message);
+                showDebug('❌ خطأ في الإيقاف: ' + error.message);
             }
         }
 
         // تشغيل المحاكاة
         async function runSimulation() {
             const startDate = prompt('تاريخ البداية (YYYY-MM-DD):', '2024-01-01');
-            const endDate = prompt('تاريخ النهاية (YYYY-MM-DD):', '2024-01-31');
+            const endDate = prompt('تاريخ النهاية (YYYY-MM-DD):', '2024-01-07');
             
             if (!startDate || !endDate) return;
+            
+            showDebug('📊 جاري تشغيل المحاكاة...');
             
             try {
                 const response = await fetch('/simulate', {
@@ -586,12 +696,29 @@
                 });
                 
                 const result = await response.json();
-                alert(`نتيجة المحاكاة:\nالرصيد النهائي: $${result.final_balance}\nالتوقع: $${result.projected_balance}`);
+                alert(`نتيجة المحاكاة:\nالرصيد النهائي: $${result.final_balance}\nعدد الصفقات: ${result.trades ? result.trades.length : 0}`);
+                showDebug('✅ المحاكاة اكتملت - الرصيد: $' + result.final_balance);
                 
             } catch (error) {
-                alert('خطأ في المحاكاة: ' + error.message);
+                alert('❌ خطأ في المحاكاة: ' + error.message);
+                showDebug('❌ خطأ في المحاكاة: ' + error.message);
             }
         }
+
+        // عرض معلومات التصحيح
+        function showDebug(message) {
+            const debugInfo = document.getElementById('debugInfo');
+            const timestamp = new Date().toLocaleTimeString();
+            debugInfo.innerHTML = `<p><small>${timestamp}</small> ${message}</p>` + debugInfo.innerHTML;
+            
+            // حفظ في console أيضًا
+            console.log(message);
+        }
+
+        // منع إعادة تحميل الصفحة عند submit
+        document.addEventListener('submit', function(e) {
+            e.preventDefault();
+        });
     </script>
 </body>
 </html>
