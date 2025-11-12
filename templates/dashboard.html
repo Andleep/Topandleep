@@ -109,7 +109,7 @@
             border: 2px solid var(--gold);
             border-radius: 8px;
             width: 100%;
-            font-size: 16px; /* يمنع التكبير في iOS */
+            font-size: 16px;
         }
         
         .btn {
@@ -249,6 +249,26 @@
             color: white;
         }
         
+        .profit-positive {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .profit-negative {
+            color: #f44336;
+            font-weight: bold;
+        }
+        
+        .trade-buy {
+            background: #e8f5e8;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .trade-sell {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+        }
+        
         @media (min-width: 768px) {
             .container {
                 max-width: 700px;
@@ -287,11 +307,8 @@
             <div id="botStatus" class="status-stopped">⏹️ متوقف</div>
         </div>
 
-        <!-- اختبار الاتصال -->
-        <div class="connection-test" id="connectionTest" style="display: none;">
-            <strong>🔍 اختبار الاتصال:</strong>
-            <div id="connectionStatus">جاري الاختبار...</div>
-        </div>
+        <!-- نتائج اختبار المفاتيح -->
+        <div id="keyTestResult" style="display: none; margin: 15px 0; padding: 15px; border-radius: 10px;"></div>
 
         <!-- لوحة التحكم -->
         <div class="control-panel">
@@ -303,10 +320,22 @@
                     <option value="REAL">🚀 الوضع الحقيقي</option>
                 </select>
             </div>
-            <button class="btn btn-test" onclick="testConnection()">🔗 اختبار الاتصال</button>
-            <button class="btn btn-start" onclick="startBot()">🚀 بدء التداول</button>
-            <button class="btn btn-stop" onclick="stopBot()">🛑 إيقاف التداول</button>
-            <button class="btn btn-simulate" onclick="runSimulation()">📊 محاكاة متقدمة</button>
+            
+            <button class="btn btn-test" onclick="testApiKeys()">
+                🔍 اختبار مفصل للمفاتيح
+            </button>
+            
+            <button class="btn btn-start" onclick="startBot()">
+                🚀 بدء التداول
+            </button>
+            
+            <button class="btn btn-stop" onclick="stopBot()">
+                🛑 إيقاف التداول
+            </button>
+            
+            <button class="btn btn-simulate" onclick="runSimulation()">
+                📊 محاكاة متقدمة
+            </button>
         </div>
 
         <!-- شريط التقدم -->
@@ -374,14 +403,16 @@
                     <thead>
                         <tr>
                             <th>الوقت</th>
-                            <th>الرمز</th>
-                            <th>النوع</th>
-                            <th>الربح</th>
-                            <th>الحالة</th>
+                            <th>العملة</th>
+                            <th>العملية</th>
+                            <th>سعر الدخول</th>
+                            <th>سعر الخروج</th>
+                            <th>الربح/الخسارة</th>
+                            <th>الاستراتيجية</th>
                         </tr>
                     </thead>
                     <tbody id="tradesTableBody">
-                        <tr><td colspan="5">جاري التحميل...</td></tr>
+                        <tr><td colspan="7">جاري التحميل...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -520,11 +551,13 @@
             }
             
             liveTradesContainer.innerHTML = liveTrades.map(trade => `
-                <div style="background: #f8f9fa; padding: 10px; margin: 5px 0; border-radius: 8px; border-left: 4px solid #4CAF50;">
-                    <strong>${trade.symbol}</strong> - ${trade.type} 
-                    <br><small>الاستراتيجية: ${trade.strategy}</small>
-                    <br><small>المبلغ: $${trade.amount}</small>
-                    <br><small>الربح: $${trade.profit}</small>
+                <div style="background: ${trade.action === 'BUY' ? '#e8f5e8' : '#ffebee'}; padding: 10px; margin: 5px 0; border-radius: 8px; border-left: 4px solid ${trade.action === 'BUY' ? '#4CAF50' : '#f44336'};">
+                    <strong>${trade.symbol}</strong> - ${trade.action === 'BUY' ? '🟢 شراء مباشر' : '🔴 بيع مباشر'} 
+                    <br><small>💰 السعر: $${trade.entry_price} → $${trade.exit_price} (${trade.price_change}%)</small>
+                    <br><small>💸 الربح: $${trade.profit} (${trade.profit_percentage}%)</small>
+                    <br><small>🎯 الاستراتيجية: ${trade.strategy}</small>
+                    <br><small>📝 السبب: ${trade.reason}</small>
+                    <br><small>🕒 الوقت: ${new Date(trade.entry_time).toLocaleTimeString()}</small>
                 </div>
             `).join('');
         }
@@ -534,7 +567,7 @@
             const tableBody = document.getElementById('tradesTableBody');
             
             if (!trades || trades.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="5">لا توجد صفقات بعد</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="7">لا توجد صفقات بعد</td></tr>';
                 return;
             }
             
@@ -542,8 +575,8 @@
             trades.slice().reverse().forEach(trade => {
                 const row = document.createElement('tr');
                 const profit = trade.profit || 0;
-                const profitColor = profit > 0 ? '#4CAF50' : profit < 0 ? '#f44336' : '#666';
-                const time = new Date(trade.timestamp).toLocaleTimeString('ar-EG', { 
+                const profitClass = profit > 0 ? 'profit-positive' : 'profit-negative';
+                const time = new Date(trade.entry_time || trade.timestamp).toLocaleTimeString('ar-EG', { 
                     hour: '2-digit', 
                     minute: '2-digit',
                     second: '2-digit'
@@ -551,35 +584,39 @@
                 
                 row.innerHTML = `
                     <td>${time}</td>
-                    <td>${trade.symbol || 'N/A'}</td>
-                    <td>${trade.type || 'N/A'}</td>
-                    <td style="color: ${profitColor}; font-weight: bold;">$${profit.toFixed(2)}</td>
+                    <td><strong>${trade.symbol || 'N/A'}</strong></td>
                     <td>
-                        <span style="color: ${trade.status === 'OPEN' ? '#4CAF50' : '#666'};">
-                            ${trade.status === 'OPEN' ? '🟢 حية' : '🔴 مغلقة'}
+                        <span style="color: ${trade.action === 'BUY' ? '#4CAF50' : '#f44336'}; font-weight: bold;">
+                            ${trade.action === 'BUY' ? '🟢 شراء' : '🔴 بيع'}
                         </span>
                     </td>
+                    <td>$${trade.entry_price || 'N/A'}</td>
+                    <td>$${trade.exit_price || 'N/A'}</td>
+                    <td class="${profitClass}">
+                        $${profit.toFixed(2)} 
+                        ${trade.profit_percentage ? `(${trade.profit_percentage}%)` : ''}
+                    </td>
+                    <td>${trade.strategy || 'N/A'}</td>
                 `;
                 tableBody.appendChild(row);
             });
         }
 
-        // اختبار الاتصال
-        async function testConnection() {
-            const apiKey = document.getElementById('apiKey').value;
-            const apiSecret = document.getElementById('apiSecret').value;
+        // اختبار مفصل للمفاتيح
+        async function testApiKeys() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const apiSecret = document.getElementById('apiSecret').value.trim();
+            const mode = document.getElementById('modeSelect').value;
             
             if (!apiKey || !apiSecret) {
-                alert('⚠️ يرجى إدخال مفاتيح API أولاً');
+                showKeyTestResult('❌ يرجى إدخال كلا المفتاحين', false);
                 return;
             }
             
-            showDebug('🔗 جاري اختبار الاتصال بـ Binance...');
-            document.getElementById('connectionTest').style.display = 'block';
-            document.getElementById('connectionStatus').textContent = 'جاري الاختبار...';
+            showKeyTestResult('🔍 جاري اختبار المفاتيح...', true);
             
             try {
-                const response = await fetch('/start', {
+                const response = await fetch('/test-api-keys', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -587,31 +624,49 @@
                     body: JSON.stringify({
                         api_key: apiKey,
                         api_secret: apiSecret,
-                        mode: 'DEMO',
-                        test_connection: true
+                        mode: mode
                     })
                 });
                 
                 const result = await response.json();
                 
-                if (response.ok) {
-                    document.getElementById('connectionStatus').innerHTML = '✅ <strong>الاتصال ناجح!</strong> - المفاتيح صحيحة';
-                    showDebug('✅ اختبار الاتصال نجح - جاهز للتداول');
+                if (result.success) {
+                    showKeyTestResult(`
+                        ✅ ${result.message}
+                        <br><small>🔄 يمكن التداول: ${result.details.can_trade ? 'نعم' : 'لا'}
+                        <br>🌐 نوع الحساب: ${result.details.account_type}
+                        <br>📊 عدد الأصول: ${result.details.balances_count}</small>
+                    `, true);
                 } else {
-                    document.getElementById('connectionStatus').innerHTML = '❌ <strong>فشل الاتصال:</strong> ' + (result.error || 'تحقق من المفاتيح');
-                    showDebug('❌ فشل اختبار الاتصال: ' + (result.error || 'مفاتيح خاطئة'));
+                    showKeyTestResult(`
+                        ❌ ${result.message}
+                        <br><small>🔍 ${result.details}
+                        ${result.error ? `<br>📝 ${result.error}` : ''}</small>
+                    `, false);
                 }
                 
             } catch (error) {
-                document.getElementById('connectionStatus').innerHTML = '❌ <strong>خطأ في الشبكة:</strong> ' + error.message;
-                showDebug('❌ خطأ شبكة: ' + error.message);
+                showKeyTestResult(`
+                    ❌ خطأ في الشبكة
+                    <br><small>🔍 ${error.message}</small>
+                `, false);
             }
+        }
+
+        // عرض نتائج اختبار المفاتيح
+        function showKeyTestResult(message, isSuccess) {
+            const resultDiv = document.getElementById('keyTestResult');
+            resultDiv.style.display = 'block';
+            resultDiv.style.background = isSuccess ? '#d4edda' : '#f8d7da';
+            resultDiv.style.border = isSuccess ? '1px solid #c3e6cb' : '1px solid #f5c6cb';
+            resultDiv.style.color = isSuccess ? '#155724' : '#721c24';
+            resultDiv.innerHTML = message;
         }
 
         // بدء التداول
         async function startBot() {
-            const apiKey = document.getElementById('apiKey').value;
-            const apiSecret = document.getElementById('apiSecret').value;
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const apiSecret = document.getElementById('apiSecret').value.trim();
             const mode = document.getElementById('modeSelect').value;
             
             if (!apiKey || !apiSecret) {
