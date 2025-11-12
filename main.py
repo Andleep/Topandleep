@@ -81,35 +81,73 @@ def get_intelligence():
     stats = bot.get_performance_stats()
     return jsonify(stats['adaptive_intelligence'])
 
-@app.route('/test-connection', methods=['POST'])
-def test_connection():
-    """اختبار الاتصال بـ Binance"""
+@app.route('/test-api-keys', methods=['POST'])
+def test_api_keys():
+    """اختبار مفصل للمفاتيح"""
     try:
         data = request.json
-        api_key = data.get('api_key')
-        api_secret = data.get('api_secret')
+        api_key = data.get('api_key', '').strip()
+        api_secret = data.get('api_secret', '').strip()
         mode = data.get('mode', 'DEMO')
         
-        # اختبار الاتصال
+        if not api_key or not api_secret:
+            return jsonify({
+                "success": False,
+                "message": "❌ يرجى إدخال كلا المفتاحين",
+                "details": "المفاتيح لا يمكن أن تكون فارغة"
+            })
+        
+        if len(api_key) < 20:
+            return jsonify({
+                "success": False, 
+                "message": "❌ مفتاح API قصير جداً",
+                "details": f"الطول الحالي: {len(api_key)} - يجب أن يكون 20 حرفاً على الأقل"
+            })
+            
+        if len(api_secret) < 20:
+            return jsonify({
+                "success": False,
+                "message": "❌ مفتاح Secret قصير جداً", 
+                "details": f"الطول الحالي: {len(api_secret)} - يجب أن يكون 20 حرفاً على الأقل"
+            })
+        
+        # اختبار الاتصال الفعلي
         from binance.client import Client
         client = Client(api_key, api_secret, testnet=(mode=='DEMO'))
         
-        # جلب معلومات الحساب
+        # اختبار الحساب
         account_info = client.get_account()
         
         return jsonify({
-            "status": "success",
-            "message": "✅ الاتصال بنجاح بـ Binance Testnet",
-            "can_trade": account_info.get('canTrade', False),
-            "balances": len(account_info.get('balances', [])),
-            "server_time": client.get_server_time()
+            "success": True,
+            "message": "✅ المفاتيح صحيحة والاتصال ناجح!",
+            "details": {
+                "can_trade": account_info.get('canTrade', False),
+                "account_type": "Testnet" if mode == "DEMO" else "Real",
+                "balances_count": len(account_info.get('balances', [])),
+                "server_time": client.get_server_time()['serverTime']
+            }
         })
         
     except Exception as e:
+        error_msg = str(e)
+        details = "خطأ غير معروف"
+        
+        if "Invalid API-key" in error_msg:
+            details = "مفتاح API غير صحيح - تأكد من نسخه من testnet.binance.vision"
+        elif "Signature" in error_msg:
+            details = "مفتاح Secret غير صحيح - تأكد من نسخه بشكل كامل"
+        elif "restrictions" in error_msg.lower():
+            details = "قيود جغرافية - قد تحتاج VPN أو سيرفر في منطقة أخرى"
+        elif "connection" in error_msg.lower():
+            details = "مشكلة في الاتصال - تحقق من الإنترنت أو جرب لاحقاً"
+        
         return jsonify({
-            "status": "error",
-            "message": f"❌ فشل الاتصال: {str(e)}"
-        }), 400
+            "success": False,
+            "message": "❌ فشل في الاتصال",
+            "details": details,
+            "error": error_msg
+        })
 
 @app.route('/debug-info')
 def get_debug_info():
@@ -126,5 +164,5 @@ def get_debug_info():
     return jsonify(debug_info)
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 3000))
+    port = int(os.getenv('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
