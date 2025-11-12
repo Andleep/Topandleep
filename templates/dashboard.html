@@ -1,47 +1,39 @@
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-<meta charset="UTF-8">
-<title>لوحة AION Quantum Supreme</title>
-<style>
-body { font-family: Arial, sans-serif; direction: rtl; text-align: right; margin: 20px; }
-button { padding: 10px 20px; margin: 5px; }
-table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-th, td { border: 1px solid #000; padding: 8px; }
-th { background-color: #f2f2f2; }
-</style>
-</head>
-<body>
-<h1>AION Quantum Supreme</h1>
-<p>الرصيد الحالي: ${{ balance }}</p>
-<p>معدل تعلم البوت: {{ learning_rate }}</p>
+import pandas as pd
+import ta
 
-<button onclick="location.href='/start'">ابدأ التداول المباشر</button>
-<button onclick="location.href='/stop'">إيقاف التداول</button>
-<button onclick="location.href='/simulate'">تشغيل المحاكاة</button>
-
-<table>
-<tr>
-<th>الاستراتيجية</th>
-<th>حجم الصفقة</th>
-<th>الربح</th>
-<th>الرصيد</th>
-</tr>
-{% for trade in trades %}
-<tr>
-<td>{{ trade.strategy }}</td>
-<td>{{ trade.size }}</td>
-<td>{{ trade.profit }}</td>
-<td>{{ trade.balance }}</td>
-</tr>
-{% endfor %}
-</table>
-
-<h2>أداء الاستراتيجيات</h2>
-<ul>
-{% for strategy, perf in strategies.items() %}
-<li>{{ strategy }}: {{ perf }}</li>
-{% endfor %}
-</ul>
-</body>
-</html>
+def compute_indicators(df):
+    """حساب المؤشرات الفنية"""
+    try:
+        close = df['close'].astype(float)
+        
+        # RSI
+        rsi = ta.momentum.RSIIndicator(close, window=14).rsi()
+        
+        # MACD
+        macd_indicator = ta.trend.MACD(close)
+        macd = macd_indicator.macd()
+        macd_signal = macd_indicator.macd_signal()
+        macd_diff = macd_indicator.macd_diff()
+        
+        # Bollinger Bands
+        bb = ta.volatility.BollingerBands(close, window=20, window_dev=2)
+        bb_upper = bb.bollinger_hband()
+        bb_lower = bb.bollinger_lband()
+        
+        # EMA
+        ema_fast = ta.trend.EMAIndicator(close, window=12).ema_indicator()
+        ema_slow = ta.trend.EMAIndicator(close, window=26).ema_indicator()
+        
+        return {
+            'rsi': rsi,
+            'macd': macd,
+            'macd_signal': macd_signal,
+            'macd_diff': macd_diff,
+            'bb_upper': bb_upper,
+            'bb_lower': bb_lower,
+            'ema_fast': ema_fast,
+            'ema_slow': ema_slow
+        }
+    except Exception as e:
+        print(f"Indicators calculation error: {e}")
+        return None
